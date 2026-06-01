@@ -2,7 +2,9 @@
 
 LUMOS RF is an experimental wireless sensing and telemetry platform that uses radio frequency (RF) signal disturbances to detect human presence, motion, and activity level. By monitoring and processing Received Signal Strength Indicator (RSSI) fluctuations, LUMOS RF demonstrates how wireless infrastructure (like a home Wi-Fi router) can double as a passive motion detection system.
 
-Dataset Notice
+---
+
+### Dataset Notice
 
 The datasets included in this repository were collected using:
 
