@@ -4,21 +4,30 @@ LUMOS RF is an experimental wireless sensing and telemetry platform that uses ra
 
 ---
 
-### Dataset Notice
+### 📊 Dataset Notice
 
 The datasets included in this repository were collected using:
 
 Edimax 2.4 GHz Wi-Fi Router
 ESP8266 NodeMCU Receiver
-Indoor residential environment
+Indoor Residential Environment
 
-Because Wi-Fi sensing depends heavily on room geometry, furniture placement, wall materials, antenna orientation, router characteristics, and RF noise conditions, the provided datasets may not directly generalize to other environments.
+Wi-Fi sensing performance is highly dependent on:
 
-The datasets are intended as research and experimentation resources.
+Room geometry
+Furniture placement
+Wall materials
+Antenna orientation
+RF interference levels
+Router characteristics
 
-For my specific setup, the collected datasets achieved approximately 90% detection accuracy during testing. Results may vary significantly when reproduced using different routers, antennas, room layouts, or hardware platforms.
+As a result, the provided datasets may not directly generalize to other environments.
 
-Users are encouraged to generate their own datasets using the included dataset generation tools for best performance in their environments.
+The datasets are intended primarily for research, experimentation, and TinyML workflow development.
+
+During testing on the original setup, the recorded datasets achieved approximately 90% motion detection accuracy. However, these results should be considered setup-specific rather than universally reproducible.
+
+For best performance, users are encouraged to generate their own datasets using the included dataset generation tools and retrain models for their target environment.
 
 ---
 
