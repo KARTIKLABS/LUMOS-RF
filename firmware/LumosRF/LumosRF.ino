@@ -11,15 +11,13 @@
 #include "WifiManager.h"
 #include "Filters.h"
 #include "MotionClassifier.h"
-#include "SDLogger.h"
+#include <WiFiUdp.h>
 
 // System Components
 WifiManager wifi;
 Filters filter;
 MotionClassifier classifier;
-#if ENABLE_SD_LOGGING
-SDLogger sdLogger;
-#endif
+WiFiUDP udpStream;
 
 // Timers and State Variables
 unsigned long lastSampleTime = 0;
@@ -44,12 +42,10 @@ void setup() {
     // 1. Initialize WiFi connection to the Edimax router
     wifi.begin();
     
-    // 2. Initialize SPI SD Card logging
-#if ENABLE_SD_LOGGING
-    if (!sdLogger.begin()) {
-        Serial.println("[WARN] Logging disabled due to SD initialization failure. Serial telemetry active.");
-    }
-#endif
+    // 2. Initialize UDP stream
+    udpStream.begin(UDP_HUB_PORT);
+    Serial.print("[INFO] UDP client bound to port: ");
+    Serial.println(UDP_HUB_PORT);
     
     // 3. Initiate Baseline Calibration
     // The user should remain still during this phase to establish the noise floor.
@@ -134,15 +130,17 @@ void loop() {
                     Serial.println(levelStr);
                 }
                 
-                // 3. Log to MicroSD Card (if module is active)
-#if ENABLE_SD_LOGGING
-                if (sdLogger.isEnabled()) {
-                    bool writeSuccess = sdLogger.logData(currentMillis, rawRssi, rssiVar, levelStr);
-                    if (!writeSuccess) {
-                        Serial.println("[ERROR] SD card write failure!");
-                    }
+                // 3. Stream Telemetry via UDP
+                if (wifi.isConnected()) {
+                    char packetBuffer[256];
+                    snprintf(packetBuffer, sizeof(packetBuffer),
+                             "{\"node_id\":\"%s\",\"ms\":%lu,\"rssi\":%d,\"mean\":%.2f,\"var\":%.4f,\"anomaly\":%.2f,\"level\":\"%s\"}",
+                             NODE_ID, currentMillis, rawRssi, rssiMean, rssiVar, anomalyScore, levelStr);
+                    
+                    udpStream.beginPacket(UDP_HUB_IP, UDP_HUB_PORT);
+                    udpStream.write((const uint8_t*)packetBuffer, strlen(packetBuffer));
+                    udpStream.endPacket();
                 }
-#endif
                 
                 // Update historical state
                 lastMotionLevel = currentLevel;

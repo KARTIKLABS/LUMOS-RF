@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMOS RF 3D — Real-Time Spatial Localization</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Three.js and OrbitControls via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation & Telemetry -->
+        <aside class="sidebar glass">
+            <div class="logo-area">
+                <div class="logo-glow"></div>
+                <h1>LUMOS <span>RF 3D</span></h1>
+                <p class="subtitle">Passive Spatial Localization Engine</p>
+            </div>
+
+            <div class="section-title">SYSTEM STATUS</div>
+            <div class="status-card glass">
+                <div class="status-row">
+                    <span class="label">Localization Engine:</span>
+                    <span id="engine-status" class="value badge badge-red">OFFLINE</span>
+                </div>
+                <div class="status-row">
+                    <span class="label">Active Anchors:</span>
+                    <span id="active-anchors-count" class="value highlight">0</span>
+                </div>
+            </div>
+
+            <div class="section-title">TARGET POSITION (X, Y, Z)</div>
+            <div class="coord-display glass">
+                <div class="coord-box">
+                    <span class="axis">X</span>
+                    <span id="pos-x" class="coord-val">--.--</span>
+                    <span class="unit">meters</span>
+                </div>
+                <div class="coord-box">
+                    <span class="axis">Y</span>
+                    <span id="pos-y" class="coord-val">--.--</span>
+                    <span class="unit">meters</span>
+                </div>
+                <div class="coord-box">
+                    <span class="axis">Z</span>
+                    <span id="pos-z" class="coord-val">--.--</span>
+                    <span class="unit">meters</span>
+                </div>
+            </div>
+
+            <div class="section-title">ACTIVE RECEIVER NODES</div>
+            <div id="nodes-container" class="nodes-list">
+                <div class="empty-state">Waiting for UDP streams...</div>
+            </div>
+            
+            <div class="footer">
+                <p>LUMOS RF 3D Localization System</p>
+                <p class="copyright">Designed for ESP8266 &amp; Central Hub</p>
+            </div>
+        </aside>
+
+        <!-- Main 3D Workspace -->
+        <main class="main-content">
+            <div class="top-nav glass">
+                <div class="nav-title">3D SPATIAL LOCALIZATION LAB</div>
+                <div class="controls-info">
+                    <span>🖱️ Drag to rotate</span>
+                    <span>🖱️ Right-click to pan</span>
+                    <span>Scroll to zoom</span>
+                    <button id="clear-trail-btn" class="btn btn-cyber">Clear Trail</button>
+                </div>
+            </div>
+            
+            <div id="threejs-container">
+                <!-- Three.js Canvas mounts here -->
+                <div id="loader" class="canvas-loader">
+                    <div class="spinner"></div>
+                    <p>Initializing 3D Canvas...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

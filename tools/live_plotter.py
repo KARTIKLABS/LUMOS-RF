@@ -10,6 +10,9 @@ import re
 import time
 import argparse
 import threading
+import socket
+import select
+import json
 from collections import deque
 
 try:
@@ -32,6 +35,65 @@ data_queue = deque(maxlen=200) # History buffer size for plot
 latest_state = {"rssi": 0, "mean": 0.0, "var": 0.0, "anomaly": 0.0, "level": "IDLE"}
 lock = threading.Lock()
 running = True
+
+def udp_reader_thread(udp_port, node_id_filter=None):
+    """
+    Background thread to read and parse UDP data packets from an ESP8266.
+    """
+    global running, latest_state
+    print(f"[INFO] Binding to UDP port {udp_port}...")
+    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        sock.bind(("0.0.0.0", udp_port))
+        sock.setblocking(0)
+        print(f"[INFO] UDP Socket ready! Listening on port {udp_port}...")
+    except Exception as e:
+        print(f"[ERROR] Could not bind UDP socket: {e}")
+        running = False
+        return
+
+    while running:
+        ready = select.select([sock], [], [], 0.1)
+        if ready[0]:
+            try:
+                data, addr = sock.recvfrom(1024)
+                message = data.decode("utf-8").strip()
+                
+                try:
+                    payload = json.loads(message)
+                except Exception:
+                    continue
+                
+                node_id = payload.get("node_id")
+                if node_id_filter and node_id != node_id_filter:
+                    continue
+                
+                rssi = int(payload.get("rssi", -127))
+                mean = float(payload.get("mean", 0.0))
+                var = float(payload.get("var", 0.0))
+                anomaly = float(payload.get("anomaly", 0.0))
+                level = payload.get("level", "IDLE")
+                
+                timestamp = time.time()
+                
+                with lock:
+                    latest_state = {
+                        "rssi": rssi,
+                        "mean": mean,
+                        "var": var,
+                        "anomaly": anomaly,
+                        "level": level
+                    }
+                    data_queue.append((timestamp, rssi, mean, var, anomaly, level))
+            except Exception as e:
+                time.sleep(0.01)
+        else:
+            time.sleep(0.01)
+            
+    sock.close()
+    print("[INFO] UDP socket closed.")
 
 def serial_reader_thread(port_name, baud_rate):
     """
@@ -98,13 +160,23 @@ def serial_reader_thread(port_name, baud_rate):
 def main():
     global running
     parser = argparse.ArgumentParser(description="LUMOS RF — Real-time Wi-Fi Sensing Plotter")
-    parser.add_argument("--port", "-p", default="COM6", help="Serial port (e.g. COM3 or /dev/ttyUSB0)")
-    parser.add_argument("--baud", "-b", type=int, default=115200, help="Baud rate (default: 115200)")
+    parser.add_argument("--mode", choices=["serial", "udp"], default="serial", help="Data source mode (serial or udp)")
+    parser.add_argument("--port", "-p", default="COM6", help="Serial port (e.g. COM6) or UDP port (e.g. 5001)")
+    parser.add_argument("--baud", "-b", type=int, default=115200, help="Baud rate (default: 115200, serial mode only)")
+    parser.add_argument("--node", "-n", default=None, help="Node ID filter (udp mode only)")
     parser.add_argument("--window", "-w", type=int, default=100, help="Plot window size in samples")
     args = parser.parse_args()
 
-    # Start serial reader thread
-    reader = threading.Thread(target=serial_reader_thread, args=(args.port, args.baud), daemon=True)
+    # Start appropriate reader thread
+    if args.mode == "udp":
+        try:
+            udp_port = int(args.port)
+        except ValueError:
+            udp_port = 5001
+            print(f"[WARN] Invalid UDP port format '{args.port}'. Defaulting to port {udp_port}.")
+        reader = threading.Thread(target=udp_reader_thread, args=(udp_port, args.node), daemon=True)
+    else:
+        reader = threading.Thread(target=serial_reader_thread, args=(args.port, args.baud), daemon=True)
     reader.start()
 
     # Wait for the first data point to arrive or thread to error

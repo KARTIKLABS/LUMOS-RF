@@ -27,13 +27,6 @@
 // ============================================================================
 // HARDWARE PINOUTS (NodeMCU ESP8266)
 // ============================================================================
-// SPI MicroSD Card module connections:
-// MISO -> GPIO12 (D6)
-// MOSI -> GPIO13 (D7)
-// SCK  -> GPIO14 (D5)
-// CS   -> GPIO15 (D8) - Default HSPI Chip Select
-#define SD_CS_PIN 15
-
 // LED indicators for visual telemetry
 #define STATUS_LED_PIN LED_BUILTIN // ESP8266 Built-in LED (GPIO2/D4, active LOW)
 
@@ -58,11 +51,10 @@
 #define BASELINE_ALPHA 0.005f
 
 // ============================================================================
-// SD CARD LOGGING SETTINGS
+// UDP STREAMING SETTINGS
 // ============================================================================
-#define ENABLE_SD_LOGGING false        // Set to true to enable SD Card logger, false to disable
-#define LOG_FILE_PREFIX "/lumos_"      // Prefix for the CSV data file
-#define LOG_FILE_EXT    ".csv"         // Extension for data files
-#define MAX_FILE_SIZE_BYTES 512000     // 500 KB rolling limit per CSV file
+#define NODE_ID "node_1"               // Unique node ID for this receiver node
+#define UDP_HUB_IP "192.168.1.100"     // IP address of the central hub running Python server
+#define UDP_HUB_PORT 5001              // Port number of the central hub
 
 #endif // CONFIG_H

@@ -4,33 +4,6 @@ LUMOS RF is an experimental wireless sensing and telemetry platform that uses ra
 
 ---
 
-### 📊 Dataset Notice
-
-The datasets included in this repository were collected using:
-
-Edimax 2.4 GHz Wi-Fi Router
-ESP8266 NodeMCU Receiver
-Indoor Residential Environment
-
-Wi-Fi sensing performance is highly dependent on:
-
-Room geometry
-Furniture placement
-Wall materials
-Antenna orientation
-RF interference levels
-Router characteristics
-
-As a result, the provided datasets may not directly generalize to other environments.
-
-The datasets are intended primarily for research, experimentation, and TinyML workflow development.
-
-During testing on the original setup, the recorded datasets achieved approximately 90% motion detection accuracy. However, these results should be considered setup-specific rather than universally reproducible.
-
-For best performance, users are encouraged to generate their own datasets using the included dataset generation tools and retrain models for their target environment.
-
----
-
 ## 📡 The Science of Wi-Fi Sensing
 
 ### 1. Multipath Propagation & Interference
@@ -187,3 +160,12 @@ To train a machine learning model (e.g. Edge Impulse or scikit-learn) to recogni
   * Adjust `SLIGHT_THRESHOLD`, `MODERATE_THRESHOLD`, and `HEAVY_THRESHOLD`.
   * For example, lowering `SLIGHT_THRESHOLD` will make the system more sensitive to small movements, but might introduce false alarms from background RF noise.
 * **Baseline Adaptation**: The Exponential Moving Average updates the baseline at a rate controlled by `BASELINE_ALPHA`. A small value (like `0.005`) ensures the system adapts to gradual temperature and weather changes without losing sensitivity to human presence.
+
+---
+
+## 🛰️ 3D Passive Spatial Localization Upgrade
+
+LUMOS RF has been expanded from a single-node activity classifier to a **multi-node 3D Passive Spatial Localization** system. By deploying multiple receiver nodes in a room, the central processing hub runs spherical trilateration calculations and a 3D Kalman filter to track human target coordinates in real time.
+
+For full setup, configuration, server execution, and 3D WebGL dashboard instructions, please refer to the detailed [HOW_TO_USE.md](HOW_TO_USE.md) guide.
+
